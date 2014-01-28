@@ -1,14 +1,15 @@
 package juliensjukebox;
 
-import java.awt.Component;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.JButton;
 import javax.swing.BoxLayout;
+import javax.swing.Box;
 
 import java.awt.Font;
 import java.awt.Dimension;
+import java.awt.Component;
 
 import java.awt.event.ActionEvent;
 import java.awt.event.KeyEvent;
@@ -18,15 +19,11 @@ import java.awt.event.WindowEvent;
 import java.awt.event.ActionListener;
 
 import java.util.Random;
-import java.util.logging.Level;
-import java.util.logging.Logger;
-import javax.swing.Box;
 
 
 public class Math extends JFrame implements KeyListener, Runnable {
     
-    JLabel clock = new JLabel();
-    JLabel task = new JLabel();
+    JLabel clock, task = new JLabel();
     JTextField input = new JTextField(14);
     JButton start = new JButton("Start");
     
@@ -34,6 +31,7 @@ public class Math extends JFrame implements KeyListener, Runnable {
     
     Random r = new Random();
     int secondsLeft = 72, correct = 0, tries = 0, ersteZahl, zweiteZahl;
+    char calculation;
     
     public Math() {
         
@@ -43,16 +41,23 @@ public class Math extends JFrame implements KeyListener, Runnable {
         setLocationRelativeTo(null);
         setLayout(new BoxLayout(getContentPane(),BoxLayout.PAGE_AXIS));
         
-        Box box = Box.createVerticalBox();
-        
-        // Zentrieren
+        // Center
         clock.setAlignmentX(Component.CENTER_ALIGNMENT);
         task.setAlignmentX(Component.CENTER_ALIGNMENT);
         input.setAlignmentX(Component.CENTER_ALIGNMENT);
         start.setAlignmentX(Component.CENTER_ALIGNMENT);
+        
+        // Set font
+        task.setFont(new Font("Arial",Font.BOLD,24));
+        
+        // Push it to the center (vertically)
+        Box box = Box.createVerticalBox();
         add(box.createVerticalStrut(50));
+        
+        // Change Size&Position of textfield
         input.setMaximumSize(new Dimension(getWidth(),20));
         input.setHorizontalAlignment(JTextField.CENTER);
+        input.addKeyListener(this);
         
         // WindowListener (to go back to main menu)
         this.addWindowListener(new WindowAdapter() {
@@ -74,8 +79,6 @@ public class Math extends JFrame implements KeyListener, Runnable {
                 thread.start();
             }
         });
-        
-        input.addKeyListener(this);
         add(start);
         
         setVisible(true);
@@ -91,37 +94,68 @@ public class Math extends JFrame implements KeyListener, Runnable {
     
     @Override
     public void run() {
+        
+        // Put an exercise on screen
         changeText();
         
-        // Timer
+        // One could say.. it is..
+        showTime();
+    }
+    
+    // Set the clock to the time remaining
+    public void showTime() {
         while(true) {
+            
+            // Set the clock to current seconds Left
             clock.setText(formatTime(secondsLeft));
+            
+            // Pause
             try {
                 Thread.sleep(1000);
-            } catch (InterruptedException ex) {
-                Logger.getLogger(Math.class.getName()).log(Level.SEVERE, null, ex);
-            }
+            } catch (InterruptedException ex) { }
         
-            // Wenn Timer abgelaufen, dann keine Möglichkeit mehr Input
+            // When time is up, no possibility of entering an input
             if(secondsLeft != 0) {
                 secondsLeft--;
             }else {
                 input.setEditable(false);
-                this.add(new JLabel("HALLLO"));
+                this.add(new JLabel("HALLLO")); //TODO: results
                 break;
             }
         }
     }
     
-    // Neue Aufgabe auf dem TextField ausgeben 
+    // Print new exercise to the textfield
     public void changeText() {
-        do {
-            ersteZahl = r.nextInt(1000);
-            zweiteZahl = r.nextInt(1000);
-        }while(ersteZahl+zweiteZahl > 10000);
+        
+        // Determine calculation type
+        switch(calculation) {
+            // Addition
+            case 'a': 
+                do {
+                    ersteZahl = r.nextInt(1000);
+                    zweiteZahl = r.nextInt(1000);
+                }while(ersteZahl+zweiteZahl > 10000);
+                break;
+            // Subtraction
+            case 's':
+                break;
+            
+            // Multiplication
+            case 'm':
+                break;
+            
+            // Division
+            case 'd':
+                break;
+            
+            // Not sure
+            default:
+                System.err.println("What are you doing?!");
+                break;
+        }
         
         task.setText(ersteZahl + " + " + zweiteZahl);
-        task.setFont(new Font("Arial",Font.BOLD,24));
     }
     
     // Umwandlung von Sekunden in Minuten und Sekunden
